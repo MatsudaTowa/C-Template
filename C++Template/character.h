@@ -9,12 +9,16 @@
 #define _CHARACTER_H_
 #include "main.h"
 #include "objectX.h"
+#include "model_parts.h"
 
 //プレイヤークラス
 class CCharacter : public CObjectX
 {
 public:
+	static const int MAX_KEY = 20; //キー最大数
+	static const int MAX_MOTION = 5;
 	static const int CHARACTER_PRIORITY = 8; //描画順
+	static const int MAX_PARTS = 12; //最大パーツ数
 	static const float  BOSS_FIELD_X; //ボス戦のX座標
 
 	typedef enum
@@ -30,7 +34,11 @@ public:
 	void Uninit()override;
 	void Update()override;
 	void Draw()override;
+	void MotionDraw(int NumParts);
 
+	void Load_Parts(const char* FileName, int NumParts);
+	void Motion(int NumParts); //モーション処理
+	void SetMotion(int Motion, int NumParts); //引数で指定したモーションに切り替える
 	void Gravity(); //重力処理
 	void HitBlock(); //ブロック当たり判定
 	void HitField(); //床当たり判定
@@ -108,7 +116,36 @@ private:
 	bool m_bWay; //どっち向いてるか(true:右false:左)
 	int m_nLife; //体力
 	int m_nStateCnt; //ステート切り替え計測カウント
+	int m_PartsCnt; //パーツ数
+	int m_nMotionFrameCnt; //切り替えフレームカウント
+	int m_nKeySetCnt; //キー切り替えカウント
+	int m_Motion; //モーション(各オブジェクトから列挙を受け取る)
+	CModel_Parts* m_apModel[MAX_PARTS];
 	CHARACTER_STATE m_State; //プレイヤー状態
 	D3DXCOLOR m_col; //カラー
+
+		//キー情報構造体
+	typedef struct
+	{
+		D3DXVECTOR3 pos;
+		D3DXVECTOR3 rot;
+	}Key;
+
+	//キー設定構造体
+	typedef struct
+	{
+		int nFrame; //フレーム数
+		Key key[MAX_KEY];
+	}KeySet;
+
+	//モーション設定構造体
+	typedef struct
+	{
+		int nLoop; //ループするかどうか
+		int nNumKey; //キー数
+		KeySet keySet[MAX_PARTS];
+	}MotionSet;
+
+	MotionSet m_MotionSet[MAX_MOTION]; //モーション設定
 };
 #endif

@@ -18,8 +18,7 @@ public:
 	static const int MAX_KEY = 20; //キー最大数
 	static const int NUM_MOTION	= 3;
 	static const int PLAYER_PRIORITY = 8; //描画順
-	static const int PLAYER_PARTS = 10; //パーツ数
-	static const int PARTS_PARENT[PLAYER_PARTS]; //パーツ数
+	static const int PARTS_PARENT[NUM_PARTS]; //パーツ数
 
 	CPlayer_test(int nPriority = PLAYER_PRIORITY);
 	~CPlayer_test();
@@ -46,13 +45,10 @@ private:
 	void ReSpawn(); //リスポーン
 	void PlayerMove(); //プレイヤー移動処理
 
-	void LoadPlayer_Parts();
-
 	int m_nJumpCnt; //ジャンプカウント
 
-	int m_PartsCnt; //パーツ数
 
-	CModel_Parts*m_apModel[PLAYER_PARTS];
+	CModel_Parts*m_apModel[NUM_PARTS];
 
 	static LPDIRECT3DTEXTURE9 m_pTextureTemp;
 
@@ -70,38 +66,6 @@ private:
 	}Motion_Type;
 
 	Motion_Type m_Motion; //モーションの種類
-
-	int m_nMotionFrameCnt; //切り替えフレームカウント
-
-	int m_nKeySetCnt; //キー切り替えカウント
-
-	void Motion(void); //モーション処理
-
-	void SetMotion(Motion_Type Motion); //引数で指定したモーションに切り替える
-
-	//キー情報構造体
-	typedef struct
-	{
-		D3DXVECTOR3 pos; 
-		D3DXVECTOR3 rot;
-	}Key;
-
-	//キー設定構造体
-	typedef struct
-	{
-		int nFrame; //フレーム数
-		Key key[MAX_KEY];
-	}KeySet;
-
-	//モーション設定構造体
-	typedef struct
-	{
-		int nLoop; //ループするかどうか
-		int nNumKey; //キー数
-		KeySet keySet[NUM_PARTS];
-	}MotionSet;
-
-	MotionSet m_MotionSet[NUM_MOTION]; //モーション設定
 
 	void DebugPos();
 
