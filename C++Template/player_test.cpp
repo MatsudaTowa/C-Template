@@ -270,6 +270,11 @@ void CPlayer_test::PlayerMove()
 	//どっち向いてるか取得
 	bool bWay = GetWay();
 
+	if (pKeyboard->GetTrigger(DIK_LSHIFT))
+	{
+		//SetMotion(MOTION_ATTACK, NUM_PARTS); //現在のモーションを設定
+	}
+
 	switch (pCameraType)
 	{//サイドビューの時は横にしか動かないように設定
 	case CCamera::CANERA_TYPE::TYPE_SIDEVIEW:

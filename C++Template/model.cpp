@@ -97,6 +97,43 @@ int CModel::Regist(const std::string* pModel)
 	return nIdx;
 }
 
+int CModel::Regist(const char* pModel)
+{
+	int nIdx = 0;
+	for (int nCnt = 0; nCnt < MAX_MODEL; nCnt++)
+	{
+		if (m_ModelInfo[nCnt].pBuffMat == nullptr
+			&& m_ModelInfo[nCnt].pMesh == nullptr)
+		{
+			LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+
+			//Xファイルの読み込み
+			D3DXLoadMeshFromX(pModel,
+				D3DXMESH_SYSTEMMEM,
+				pDevice,
+				NULL,
+				&m_ModelInfo[nCnt].pBuffMat,
+				NULL,
+				&m_ModelInfo[nCnt].dwNumMat,
+				&m_ModelInfo[nCnt].pMesh);
+
+			//引数のファイルパスを保存
+			m_ModelInfo[nCnt].ModelName = (std::string*)pModel;
+			nIdx = nCnt;	//番号の保存
+			m_nNumAll++;	//総数のカウントアップ
+			break;
+		}
+		else if (m_ModelInfo[nCnt].ModelName == (std::string*)pModel)
+		{//引数のモデルが存在するなら
+
+			//番号を代入してbreak
+			nIdx = nCnt;
+			break;
+		}
+	}
+	return nIdx;
+}
+
 //=============================================
 //モデル情報取得
 //=============================================

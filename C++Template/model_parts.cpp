@@ -48,9 +48,6 @@ void CModel_Parts::Unload()
 	m_nNumAll = 0;
 }
 
-//=============================================
-//xファイル読み込み
-//=============================================
 void CModel_Parts::BindXFile(LPD3DXBUFFER pBuffMat, DWORD dwNumMat, LPD3DXMESH pMesh)
 {
 
@@ -117,53 +114,86 @@ void CModel_Parts::BindXFile(LPD3DXBUFFER pBuffMat, DWORD dwNumMat, LPD3DXMESH p
 	m_ModelInfo->pMesh->UnlockVertexBuffer();
 }
 
-//=============================================
-//モデル登録
-//=============================================
-int CModel_Parts::Regist(char* pModel)
+void CModel_Parts::Draw()
 {
-	int nIdx = 0;
-	for (int nCnt = 0; nCnt < MAX_MODEL; nCnt++)
+	if (m_ModelInfo->pMesh != nullptr && m_ModelInfo->pBuffMat != nullptr)
 	{
-		if (m_ModelInfo[nCnt].pBuffMat == nullptr
-			&& m_ModelInfo[nCnt].pMesh == nullptr)
+		//デバイスの取得
+		CRenderer* pRender = CManager::GetRenderer();
+		LPDIRECT3DDEVICE9 pDevice = pRender->GetDevice();
+		D3DMATERIAL9 matDef; //現在のマテリアルの保存
+		D3DXMATRIX mtxRot, mtxTrans; //計算用マトリックス
+
+		//マトリックスの初期化
+		D3DXMatrixIdentity(&m_mtxWorld);
+
+		//αテストを有効
+		pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+		pDevice->SetRenderState(D3DRS_ALPHAREF, 0);
+		pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
+
+		//向きを反映
+		D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
+
+		D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);
+
+		//位置を反映
+		D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
+		D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxTrans);
+
+		D3DXMATRIX mtxParent; //親の行列取得
+
+		if (m_pParent != nullptr)
 		{
-			LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
-
-			//Xファイルの読み込み
-			D3DXLoadMeshFromX(pModel,
-				D3DXMESH_SYSTEMMEM,
-				pDevice,
-				NULL,
-				&m_ModelInfo[nCnt].pBuffMat,
-				NULL,
-				&m_ModelInfo[nCnt].dwNumMat,
-				&m_ModelInfo[nCnt].pMesh);
-
-			//引数のファイルパスを保存
-			m_ModelInfo[nCnt].ModelName = pModel;
-			nIdx = nCnt;	//番号の保存
-			m_nNumAll++;	//総数のカウントアップ
-			break;
+			//親のワールドマトリックス取得
+			mtxParent = m_pParent->GetMtxWorld();
 		}
-		else if (m_ModelInfo[nCnt].ModelName == pModel)
-		{//引数のモデルが存在するなら
-
-			//番号を代入してbreak
-			nIdx = nCnt;
-			break;
+		else
+		{
+			//最新のワールド返還行列を取得
+			pDevice->GetTransform(D3DTS_WORLD, &mtxParent);
 		}
+
+		D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxParent);
+
+		//ワールドマトリックスの設定
+		pDevice->SetTransform(D3DTS_WORLD, &m_mtxWorld);
+
+		D3DXMATERIAL* pMat; //マテリアル
+
+		pMat = (D3DXMATERIAL*)m_ModelInfo->pBuffMat->GetBufferPointer();
+
+		for (int nCntMat = 0; nCntMat < (int)m_ModelInfo->dwNumMat; nCntMat++)
+		{
+			//マテリアルの設定
+			pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
+
+			//テクスチャの設定
+			pDevice->SetTexture(0, m_pTexture[nCntMat]);
+
+			//パーツの設定
+			m_ModelInfo->pMesh->DrawSubset(nCntMat);
+		}
+		//αテストを無効に
+		pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+
+		//現在を取得
+		pDevice->GetMaterial(&matDef);
+
+		//保存してたマテリアルを戻す
+		pDevice->SetMaterial(&matDef);
 	}
-	return nIdx;
+	
 }
+
 
 //=============================================
 //生成
 //=============================================
-CModel_Parts* CModel_Parts::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot,char* pModel)
+CModel_Parts* CModel_Parts::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot,char* pModel_Path)
 {
 	CModel_Parts*pModelParts = new CModel_Parts;
-
+	CModel* pModel = CManager::GetModel();
 	if (pModelParts == nullptr)
 	{
 		return nullptr;
@@ -173,9 +203,9 @@ CModel_Parts* CModel_Parts::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot,char* pModel
 	pModelParts->m_rot = rot; //頂点代入
 
 	//Xファイル読み込み
-	pModelParts->BindXFile(pModelParts->GetModelInfo(pModelParts->Regist(pModel)).pBuffMat, //マテリアル取得
-		pModelParts->GetModelInfo(pModelParts->Regist(pModel)).dwNumMat, //マテリアル数取得
-		pModelParts->GetModelInfo(pModelParts->Regist(pModel)).pMesh); //メッシュ情報取得
+	pModelParts->BindXFile(pModel->GetModelInfo(pModel->Regist(pModel_Path)).pBuffMat, //マテリアル取得
+		pModel->GetModelInfo(pModel->Regist(pModel_Path)).dwNumMat, //マテリアル数取得
+		pModel->GetModelInfo(pModel->Regist(pModel_Path)).pMesh); //メッシュ情報取得
 
 	return pModelParts;
 }

@@ -125,7 +125,7 @@ void CCharacter::MotionDraw(int NumParts)
 }
 
 //=============================================
-//パーツのロード
+//パーツのロード.36
 //=============================================
 void CCharacter::Load_Parts(const char* FileName,int NumParts)
 {
@@ -255,6 +255,8 @@ void CCharacter::Load_Parts(const char* FileName,int NumParts)
 								&m_apModel[nCnt]->m_pos.x,
 								&m_apModel[nCnt]->m_pos.y,
 								&m_apModel[nCnt]->m_pos.z);
+
+								m_apModel[nCnt]->m_Tpos = m_apModel[nCnt]->m_pos;
 						}
 						else if (!strcmp(aDataSearch, "ROT"))
 						{
@@ -263,6 +265,8 @@ void CCharacter::Load_Parts(const char* FileName,int NumParts)
 								&m_apModel[nCnt]->m_rot.x,
 								&m_apModel[nCnt]->m_rot.y,
 								&m_apModel[nCnt]->m_rot.z);
+							m_apModel[nCnt]->m_Trot = m_apModel[nCnt]->m_rot;
+
 						}
 					}
 					nCnt++; //データ数加算
@@ -364,7 +368,7 @@ void CCharacter::Motion(int NumParts)
 		MovePos[nMotionCnt] = (m_MotionSet[m_Motion].keySet[nNextKey].key[nMotionCnt].pos - m_MotionSet[m_Motion].keySet[m_nKeySetCnt].key[nMotionCnt].pos) / (float)m_MotionSet[m_Motion].keySet[m_nKeySetCnt].nFrame;
 		MoveRot[nMotionCnt] = (m_MotionSet[m_Motion].keySet[nNextKey].key[nMotionCnt].rot - m_MotionSet[m_Motion].keySet[m_nKeySetCnt].key[nMotionCnt].rot) / (float)m_MotionSet[m_Motion].keySet[m_nKeySetCnt].nFrame;
 
-		//m_apModel[nMotionCnt]->m_pos += MovePos[nMotionCnt];
+		m_apModel[nMotionCnt]->m_pos += MovePos[nMotionCnt];
 		m_apModel[nMotionCnt]->m_rot += MoveRot[nMotionCnt];
 	}
 
@@ -394,7 +398,8 @@ void CCharacter::SetMotion(int Motion, int NumParts)
 
 		for (int nCntParts = 0; nCntParts < NumParts; nCntParts++)
 		{
-			//m_apModel[nCntParts]->m_pos = m_MotionSet[Motion].keySet[0].key[nCntParts].pos;
+			m_apModel[nCntParts]->m_pos = m_apModel[nCntParts]->m_Tpos;
+			m_apModel[nCntParts]->m_rot = m_apModel[nCntParts]->m_Trot;
 			m_apModel[nCntParts]->m_rot = m_MotionSet[Motion].keySet[0].key[nCntParts].rot;
 		}
 	}

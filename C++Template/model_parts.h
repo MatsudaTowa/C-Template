@@ -29,10 +29,9 @@ public:
 	void Unload(); //モデル破棄
 	void BindXFile(LPD3DXBUFFER pBuffMat, DWORD dwNumMat, LPD3DXMESH pMesh);
 	void Draw();
-	int Regist(char* pModel);
 
 	//パーツ生成
-	static CModel_Parts*Create(D3DXVECTOR3 pos,D3DXVECTOR3 rot,char* pModel);
+	static CModel_Parts*Create(D3DXVECTOR3 pos,D3DXVECTOR3 rot,char* pModel_Path);
 
 	//ワールドマトリックスの代入
 	void SetMtxWorld(D3DXMATRIX mtxWorld)
@@ -49,6 +48,8 @@ public:
 
 	D3DXVECTOR3 m_pos;
 	D3DXVECTOR3 m_rot;
+	D3DXVECTOR3 m_Tpos;
+	D3DXVECTOR3 m_Trot;
 	D3DXVECTOR3 m_minpos; //pos最小値
 	D3DXVECTOR3 m_maxpos; //pos最大値
 	int m_nIdx; //何番目のパーツか

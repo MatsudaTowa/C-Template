@@ -27,6 +27,7 @@ public:
 	~CModel();
 	void Unload(); //ƒ‚ƒfƒ‹”jŠü
 	int Regist(const std::string* pModel);
+	int Regist(const char* pModel);
 	MODEL_INFO GetModelInfo(int nIdx); //ƒ‚ƒfƒ‹î•ñæ“¾
 
 private:

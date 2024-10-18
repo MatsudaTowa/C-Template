@@ -14,6 +14,7 @@
 #include "field.h"
 #include "manager.h"
 #include "player_test.h"
+#include "enemy_test.h"
 
 const std::string CGame::BLOCK_FILE = "data\\FILE\\block.txt";
 
@@ -58,6 +59,7 @@ HRESULT CGame::Init()
 
 	//ÉvÉåÉCÉÑÅ[ê∂ê¨
 	CPlayer_test* pPlayer_test = CPlayer_test::Create(D3DXVECTOR3(-900.0f, 0.5f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 5);
+	CEnemy_test* pEnemy_test = CEnemy_test::Create(D3DXVECTOR3(-850.0f, 0.5f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 5);
 
 	return S_OK;
 }

@@ -129,6 +129,8 @@ private:
 	{
 		D3DXVECTOR3 pos;
 		D3DXVECTOR3 rot;
+
+		D3DXVECTOR3 Trot;
 	}Key;
 
 	//ÉLÅ[ê›íËç\ë¢ëÃ
