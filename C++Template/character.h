@@ -85,6 +85,18 @@ public:
 		m_nStateCnt = nStateCnt;
 	}
 
+	//パーツ数代入
+	void SetNumParts(int nNumParts)
+	{
+		m_PartsCnt = nNumParts;
+	}
+
+	//終わった判定に
+	void SetFinish(bool bFinish)
+	{
+		m_bLoopFinish = bFinish;
+	}
+
 	//移動量取得
 	D3DXVECTOR3& GetMove();
 
@@ -96,6 +108,9 @@ public:
 
 	//どっち向いてるかどうかを取得(true:右false:左)
 	bool& GetWay();
+
+	//終わってるか取得
+	bool& GetFinish();
 
 	//体力取得
 	int& GetLife();
@@ -114,6 +129,7 @@ private:
 	D3DXVECTOR3 m_oldpos; //過去の位置
 	bool m_bLanding; //着地してるかどうか
 	bool m_bWay; //どっち向いてるか(true:右false:左)
+	bool m_bLoopFinish; //ループモーションが終わったか
 	int m_nLife; //体力
 	int m_nStateCnt; //ステート切り替え計測カウント
 	int m_PartsCnt; //パーツ数

@@ -21,8 +21,9 @@ const float CCharacter::GRAVITY_MAX = 32.0f;
 //コンストラクタ
 //=============================================
 CCharacter::CCharacter(int nPriority):CObjectX(nPriority),m_bLanding(false),m_bWay(false),m_move(D3DXVECTOR3(0.0f,0.0f,0.0f)),m_nLife(0)
-,m_nStateCnt(0),m_oldpos(D3DXVECTOR3(0.0f,0.0f,0.0f)),m_State(CCharacter::CHARACTER_STATE::CHARACTER_NORMAL), m_PartsCnt(0), m_nMotionFrameCnt(0), m_nKeySetCnt(0), m_Motion(0)
-{//イニシャライザーでプライオリティ設定、各メンバ変数初期化0
+,m_nStateCnt(0),m_oldpos(D3DXVECTOR3(0.0f,0.0f,0.0f)),m_State(CCharacter::CHARACTER_STATE::CHARACTER_NORMAL), 
+m_PartsCnt(0), m_nMotionFrameCnt(0), m_nKeySetCnt(0), m_Motion(0), m_bLoopFinish()
+{//イニシャライザーでプライオリティ設定、各メンバ変数初期化
 }
 
 //=============================================
@@ -39,6 +40,8 @@ HRESULT CCharacter::Init()
 {
 	//最初どのモーションでもない値を代入
 	m_Motion = -1;
+	//ループモーション終わってる判定に
+	m_bLoopFinish = true;
 	CObjectX::Init();
     return S_OK;
 }
@@ -125,7 +128,7 @@ void CCharacter::MotionDraw(int NumParts)
 }
 
 //=============================================
-//パーツのロード.36
+//パーツのロード
 //=============================================
 void CCharacter::Load_Parts(const char* FileName,int NumParts)
 {
@@ -376,8 +379,17 @@ void CCharacter::Motion(int NumParts)
 
 	if (m_nMotionFrameCnt > m_MotionSet[m_Motion].keySet[m_nKeySetCnt].nFrame)
 	{
+
 		m_nMotionFrameCnt = 0;
 		m_nKeySetCnt = (m_nKeySetCnt + 1) % m_MotionSet[m_Motion].nNumKey;
+		if (m_nKeySetCnt == 0 && m_MotionSet[m_Motion].nLoop == 0)
+		{//キーが終わりループモーションじゃなければ
+			//モーションをニュートラルに
+			SetMotion(0,m_PartsCnt);
+			//終わった判定
+			m_bLoopFinish = true;
+		}
+		
 	}
 }
 
@@ -395,6 +407,12 @@ void CCharacter::SetMotion(int Motion, int NumParts)
 
 		//キーカウントリセット
 		m_nKeySetCnt = 0;
+
+		if (m_MotionSet[m_Motion].nLoop == 0)
+		{
+			//終わった判定
+			m_bLoopFinish = false;
+		}
 
 		for (int nCntParts = 0; nCntParts < NumParts; nCntParts++)
 		{
@@ -562,6 +580,14 @@ bool& CCharacter::GetLaunding()
 bool& CCharacter::GetWay()
 {
     return m_bWay;
+}
+
+//=============================================
+//終わってるか取得
+//=============================================
+bool& CCharacter::GetFinish()
+{
+	return m_bLoopFinish;
 }
 
 //=============================================
