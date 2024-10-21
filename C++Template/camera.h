@@ -18,6 +18,7 @@ public:
 		TYPE_BIRDVIEW = 0,
 		TYPE_SIDEVIEW,
 		TYPE_PARALLEL_SIDEVIEW, //平行投影
+		TYPE_THIRDVIEW, //第三者視点
 		TYPE_DEBUG,
 		TYPE_MAX,
 	}CANERA_TYPE;
@@ -31,6 +32,8 @@ public:
 	void Update();
 	void SetCamera();
 	void ResetCamera();
+	void DebugCameraDraw(); //ガメラのデバック表示
+
 	static CANERA_TYPE GetType();
 private:
 	static const float DEFAULT_MOVE; //通常時の移動
@@ -45,7 +48,13 @@ private:
 	static const float SIDEVIEW_LENGTH_Y; //サイドビュー時のYの距離
 	static const float SIDEVIEW_LENGTH_Z; //サイドビュー時のZの距離
 
+	static const float THIRDVIEW_CORRECT_X; //サードパーソンビュー時の補正値X
+	static const float THIRDVIEW_CORRECT_Y; //サードパーソンビュー時の補正値Y
 
+	static const float THIRDVIEW_LENGTH; //サードパーソンビュー時の距離
+
+	static const float MAX_TURN_X; //サードパーソンビュー時のXの最大可動域
+	static const float MIN_TURN_X; //サードパーソンビュー時のXの最小可動域
 
 	void CameraMove(); //カメラ移動処理
 
@@ -54,6 +63,8 @@ private:
 	void BirdViewCamera(); //バードビュー処理
 
 	void SideViewCamera(); //サイドビュー処理
+
+	void ThirdViewCamera(); //サードパーソンビュー処理
 
 	D3DXVECTOR3 m_posV; //視点
 	D3DXVECTOR3 m_posR; //注視点

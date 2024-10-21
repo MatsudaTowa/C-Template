@@ -222,7 +222,7 @@ CPlayer_test* CPlayer_test::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nLife)
 
 	pPlayer->Init(); //初期化処理
 
-	pPlayer->SetType(OBJECT_TYPE_NONE); //タイプ設定
+	pPlayer->SetType(OBJECT_TYPE_PLAYER); //タイプ設定
 
 	return pPlayer;
 }

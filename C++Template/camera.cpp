@@ -9,6 +9,7 @@
 #include "manager.h"
 #include "object.h"
 #include "player.h"
+#include "player_test.h"
 
 //通常の移動速度
 const float CCamera::DEFAULT_MOVE = 1.0f;
@@ -33,6 +34,18 @@ const float CCamera::SIDEVIEW_LENGTH_Y = 50.0f;
 
 //サイドビュー時のZの距離
 const float CCamera::SIDEVIEW_LENGTH_Z = 200.0f;
+
+//サードビュー時の距離
+const float CCamera::THIRDVIEW_LENGTH = 120.0f;
+
+//サードビュー時の補正値
+const float CCamera::THIRDVIEW_CORRECT_X = 15.0f;
+const float CCamera::THIRDVIEW_CORRECT_Y = 50.0f;
+
+//サードパーソンビュー時のXの最大可動域
+const float CCamera::MAX_TURN_X = 0.5f;
+//サードパーソンビュー時のXの最小可動域
+const float CCamera::MIN_TURN_X = 0.0f;
 
 CCamera::CANERA_TYPE CCamera::m_type = TYPE_SIDEVIEW;
 
@@ -102,6 +115,10 @@ void CCamera::Update()
 	{
 		m_type = TYPE_DEBUG;
 	}
+	else if (pKeyboard->GetTrigger(DIK_F6))
+	{
+		m_type = TYPE_THIRDVIEW;
+	}
 
 	switch (m_type)
 	{
@@ -114,6 +131,9 @@ void CCamera::Update()
 	case TYPE_PARALLEL_SIDEVIEW:
 		SideViewCamera();
 		break;
+	case TYPE_THIRDVIEW:
+		ThirdViewCamera();
+		break;
 	case TYPE_DEBUG:
 		CameraTurn();
 		CameraMove();
@@ -122,24 +142,24 @@ void CCamera::Update()
 		break;
 	}
 
-	if (m_rot.y > D3DX_PI)
+	if (m_rot.y > D3DX_PI * 2.0f)
 	{
 		m_rot.y = -D3DX_PI;
 		//		m_rot.y -= D3DX_PI* 2.0f;
 	}
 
-	if (m_rot.y < -D3DX_PI)
+	if (m_rot.y < -D3DX_PI * 2.0f)
 	{
 		m_rot.y = D3DX_PI;
 	}
 
-	if (m_rot.x > D3DX_PI)
+	if (m_rot.x > D3DX_PI * 2.0f)
 	{
 		m_rot.x = -D3DX_PI;
 		//		m_rot.y -= D3DX_PI* 2.0f;
 	}
 
-	if (m_rot.x < -D3DX_PI)
+	if (m_rot.x < -D3DX_PI * 2.0f)
 	{
 		m_rot.x = D3DX_PI;
 	}
@@ -155,6 +175,7 @@ void CCamera::Update()
 	m_moveR.x += (0.0f - m_moveR.x) * DAMPING_COEFFICIENT;
 	m_moveR.y += (0.0f - m_moveR.y) * DAMPING_COEFFICIENT;
 	m_moveR.z += (0.0f - m_moveR.z) * DAMPING_COEFFICIENT;
+
 }
 
 //=============================================
@@ -198,7 +219,7 @@ void CCamera::SetCamera()
 	D3DXVECTOR3 posR = m_posR;
 
 	posV.y += -15.0f;
-	posR.y += 0.0f;
+	posR.y += -15.0f;
 
 	//ビューマトリックスの作成
 	D3DXMatrixLookAtLH(&m_mtxView,
@@ -210,6 +231,9 @@ void CCamera::SetCamera()
 	pDevice->SetTransform(D3DTS_VIEW, &m_mtxView);
 }
 
+//======================================
+//カメラリセット
+//======================================
 void CCamera::ResetCamera()
 {
 	m_posV = D3DXVECTOR3(0.0f, 30.0f, -180.0f); //視点
@@ -391,4 +415,72 @@ void CCamera::SideViewCamera()
 			}
 		}
 	}
+}
+
+//=============================================
+//サードパーソンビュー処理
+//=============================================
+void CCamera::ThirdViewCamera()
+{
+	for (int nCnt = 0; nCnt < CObject::MAX_OBJECT; nCnt++)
+	{
+		//キーボード情報取得
+		CInputKeyboard* pKeyboard = CManager::GetKeyboard();
+
+		//オブジェクト取得
+		CObject* pObj = CObject::Getobject(CPlayer_test::PLAYER_PRIORITY, nCnt);
+		if (pObj != nullptr)
+		{//ヌルポインタじゃなければ
+			//タイプ取得
+			CObject::OBJECT_TYPE type = pObj->GetType();
+			if (type == CObject::OBJECT_TYPE::OBJECT_TYPE_PLAYER)
+			{
+				CPlayer_test* pPlayer = (CPlayer_test*)pObj;
+				m_posR.x = pPlayer->GetPos().x + THIRDVIEW_CORRECT_X;
+				m_posR.y = pPlayer->GetPos().y + THIRDVIEW_CORRECT_Y;
+				m_posR.z = pPlayer->GetPos().z;
+
+				m_posV = m_posR + D3DXVECTOR3(THIRDVIEW_LENGTH * cosf(m_rot.x) * sinf(m_rot.y), THIRDVIEW_LENGTH * sinf(m_rot.x), -THIRDVIEW_LENGTH * cosf(m_rot.x) * cosf(m_rot.y));
+
+				//m_posV.x = m_posR.x + THIRDVIEW_LENGTH * cosf(m_rot.x) * sinf(m_rot.y);
+				//m_posV.y = m_posR.y + THIRDVIEW_LENGTH_Y * sinf(m_rot.x);
+				//m_posV.z = m_posR.z - THIRDVIEW_LENGTH_Z * cosf(m_rot.x) * cosf(m_rot.y);
+
+				//g_Camera.posR.y = g_Camera.posV.y + sinf(g_Camera.rot.x) * g_Camera.fLength;
+				//g_Camera.posR.z = g_Camera.posV.z + cosf(g_Camera.rot.x) * g_Camera.fLength;
+				
+				if (pKeyboard->GetPress(DIK_UP) && m_rot.x <= MAX_TURN_X)
+				{
+					m_rot.x += 0.01f;
+				}
+				if (pKeyboard->GetPress(DIK_DOWN) && m_rot.x >= MIN_TURN_X)
+				{
+					m_rot.x -= 0.01f;
+				}
+				if (pKeyboard->GetPress(DIK_RIGHT))
+				{
+					m_rot.y += 0.01f;
+				}
+				if (pKeyboard->GetPress(DIK_LEFT))
+				{
+					m_rot.y -= 0.01f;
+				}
+			}
+		}
+	}
+}
+
+//=============================================
+//カメラのデバッグ表示
+//=============================================
+void CCamera::DebugCameraDraw()
+{
+	LPD3DXFONT pFont = CManager::GetRenderer()->GetFont();
+	RECT rect = { 0,0,SCREEN_WIDTH,SCREEN_HEIGHT };
+	char aStr[256];
+
+	sprintf(&aStr[0], "\n\n\n\n\n\n[camera]\nposR:%.1f,%.1f,%.1f\nposV:%.1f,%.1f,%.1f\nrot:%.1f,%.1f,%.1f"
+		, m_posR.x, m_posR.y, m_posR.z, m_posV.x, m_posV.y, m_posV.z,m_rot.x,m_rot.y,m_rot.z);
+	//テキストの描画
+	pFont->DrawText(NULL, &aStr[0], -1, &rect, DT_LEFT, D3DCOLOR_RGBA(255, 255, 255, 255));
 }
