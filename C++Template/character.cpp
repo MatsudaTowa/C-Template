@@ -183,6 +183,7 @@ void CCharacter::Load_Parts(const char* FileName,int NumParts)
 		{//モデルファイル読み込み
 			fscanf(pFile, "%s", &aEqual[0]);
 			fscanf(pFile, "%s", &Path[0][nCntName]);
+			//モデルパーツのクリエイト
 			m_apModel[nCntName] = CModel_Parts::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), &Path[0][nCntName]);
 
 			nCntName++;
@@ -363,6 +364,7 @@ void CCharacter::Motion(int NumParts)
 {
 	D3DXVECTOR3 MovePos[MAX_PARTS];
 	D3DXVECTOR3 MoveRot[MAX_PARTS];
+	D3DXVECTOR3 Pos = GetPos();
 
 	int nNextKey = (m_nKeySetCnt + 1) % m_MotionSet[m_Motion].nNumKey;
 
@@ -373,6 +375,8 @@ void CCharacter::Motion(int NumParts)
 
 		m_apModel[nMotionCnt]->m_pos += MovePos[nMotionCnt];
 		m_apModel[nMotionCnt]->m_rot += MoveRot[nMotionCnt];
+		Pos.x += MovePos[nMotionCnt].x;
+		SetPos(Pos);
 	}
 
 	m_nMotionFrameCnt++;

@@ -38,7 +38,7 @@ DWORD CPlayer_test::m_dwNumMat = 0;
 //=============================================
 //コンストラクタ
 //=============================================
-CPlayer_test::CPlayer_test(int nPriority) :CCharacter(nPriority), m_nJumpCnt(0),m_apModel()
+CPlayer_test::CPlayer_test(int nPriority) :CCharacter(nPriority), m_nJumpCnt(0)
 , m_Motion()
 {//イニシャライザーでメンバ変数初期化
 

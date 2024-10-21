@@ -47,8 +47,6 @@ private:
 
 	int m_nJumpCnt; //ジャンプカウント
 
-	CModel_Parts*m_apModel[NUM_PARTS];
-
 	static LPDIRECT3DTEXTURE9 m_pTextureTemp;
 
 	static LPD3DXMESH m_pMesh;

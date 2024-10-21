@@ -140,7 +140,7 @@ private:
 	CHARACTER_STATE m_State; //プレイヤー状態
 	D3DXCOLOR m_col; //カラー
 
-		//キー情報構造体
+	//キー情報構造体
 	typedef struct
 	{
 		D3DXVECTOR3 pos;
