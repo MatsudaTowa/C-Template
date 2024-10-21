@@ -48,6 +48,9 @@ void CModel_Parts::Unload()
 	m_nNumAll = 0;
 }
 
+//=============================================
+//ƒ‚ƒfƒ‹Ý’è
+//=============================================
 void CModel_Parts::BindXFile(LPD3DXBUFFER pBuffMat, DWORD dwNumMat, LPD3DXMESH pMesh)
 {
 
@@ -114,6 +117,9 @@ void CModel_Parts::BindXFile(LPD3DXBUFFER pBuffMat, DWORD dwNumMat, LPD3DXMESH p
 	m_ModelInfo->pMesh->UnlockVertexBuffer();
 }
 
+//=============================================
+//•`‰æ
+//=============================================
 void CModel_Parts::Draw()
 {
 	if (m_ModelInfo->pMesh != nullptr && m_ModelInfo->pBuffMat != nullptr)
